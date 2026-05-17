@@ -32,7 +32,7 @@ CREATE TABLE product (
 -- Table: orders
 CREATE TABLE orders (
     order_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    customer_id INT UNSIGNED NOT NULL, -- referencia lógica al Customer Service
+    customer_id INT UNSIGNED NOT NULL,
     order_date DATETIME DEFAULT CURRENT_TIMESTAMP,
     status VARCHAR(50) DEFAULT 'PENDING',
     total DECIMAL(10,2) DEFAULT 0
@@ -42,8 +42,8 @@ CREATE TABLE orders (
 -- Table: order_details
 CREATE TABLE order_detail (
     detail_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    order_id INT UNSIGNED NOT NULL, -- referencia lógica a orders
-    product_id INT UNSIGNED NOT NULL, -- referencia lógica al Product Service
+    order_id INT UNSIGNED NOT NULL,
+    product_id INT UNSIGNED NOT NULL,
     quantity INT NOT NULL,
     unit_price DECIMAL(10,2) NOT NULL,
     subtotal DECIMAL(10,2) GENERATED ALWAYS AS (quantity * unit_price) STORED
@@ -52,7 +52,7 @@ CREATE TABLE order_detail (
 -- Table: order_payments
 CREATE TABLE order_payment (
     payment_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    order_id INT UNSIGNED NOT NULL, -- referencia lógica al Order Service
+    order_id INT UNSIGNED NOT NULL,
     payment_method VARCHAR(50),
     amount DECIMAL(10,2),
     payment_date DATETIME DEFAULT CURRENT_TIMESTAMP,

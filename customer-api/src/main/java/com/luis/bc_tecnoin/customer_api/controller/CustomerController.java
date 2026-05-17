@@ -50,4 +50,14 @@ public class CustomerController {
         return ResponseEntity.noContent().build();
     }
 
+    /**
+     * GET /api/v1/customers/{userId}/exists
+     * Returns true if a customer profile exists for the given userId.
+     */
+    @GetMapping("/{userId}/exists")
+    public ResponseEntity<Boolean> existsByUserId(@PathVariable Long userId) {
+        boolean exists = service.existsByUserId(userId);
+        return ResponseEntity.ok(exists);
+    }
+
 }

@@ -94,4 +94,9 @@ public class CustomerService implements ICustomerService {
         repository.deleteById(id);
         log.debug("Customer deleted with ID: {}", id);
     }
+
+    @Override
+    public boolean existsByUserId(Long userId) {
+        return repository.existsByUserId(userId);
+    }
 }

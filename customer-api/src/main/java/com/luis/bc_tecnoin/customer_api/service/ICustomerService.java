@@ -13,4 +13,5 @@ public interface ICustomerService {
     Page<CustomerDTO> listCustomers(Pageable pageable);
     CustomerDTO updateCustomer(Long id, UpdateCustomerDTO dto);
     void deleteCustomer(Long id);
+    boolean existsByUserId(Long userId);
 }

@@ -1,8 +1,6 @@
 /.idea/
-/employee-api/
 /AGENTS.md
 /docker-compose.yml
-/order-api/
 /payment-api/
 /detail-api/
 /logs
