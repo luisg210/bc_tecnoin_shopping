@@ -11,7 +11,6 @@ public interface IOrderService {
     Page<OrderDTO> getAllOrders(Long customerId, Pageable pageable);
     void cancelOrder(Long id);
     void finishOrder(Long id);
-
     boolean existsById(Long id);
     String getOrderStatus(Long id);
 }

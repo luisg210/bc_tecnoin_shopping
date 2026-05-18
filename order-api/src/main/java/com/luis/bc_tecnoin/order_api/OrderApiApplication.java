@@ -5,10 +5,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 
 @SpringBootApplication
-public class OrderApiApiApplication {
+public class OrderApiApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(OrderApiApiApplication.class, args);
+		SpringApplication.run(OrderApiApplication.class, args);
 	}
 
 }

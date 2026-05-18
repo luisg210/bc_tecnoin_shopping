@@ -19,21 +19,19 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-@Transactional
 public class CustomerService implements ICustomerService {
-
 
     private final CustomerRepository repository;
     private final CustomerMapper mapper;
     private final AuthClient authClient;
 
     @Override
+    @Transactional
     public CustomerDTO createCustomer(CreateCustomerDTO dto) {
         log.info("Creating customer with email: {}", dto.getEmail());
 
-        // Validate user exists in Auth Service
         if (!authClient.existsById(dto.getUserId())) {
-            log.info("User doesn't exists: {}", dto.getUserId());
+            log.error("User does not exist: {}", dto.getUserId());
             throw new CustomerNotExistsException("User does not exist");
         }
 
@@ -50,31 +48,25 @@ public class CustomerService implements ICustomerService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public CustomerDTO getCustomer(Long id) {
         log.info("Fetching customer with ID: {}", id);
-
-        Customer customer = repository.findById(id)
-                .orElseThrow(() -> {
-                    log.error("Customer not found with ID: {}", id);
-                    return new CustomerNotExistsException("Customer not found");
-                });
-
-        return mapper.toDTO(customer);
+        return mapper.toDTO(findCustomerById(id));
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<CustomerDTO> listCustomers(Pageable pageable) {
-        log.info("Listing customers with pageable: {}", pageable);
+        log.debug("Listing customers with pageable: {}", pageable);
         return repository.findAll(pageable).map(mapper::toDTO);
     }
 
     @Override
+    @Transactional
     public CustomerDTO updateCustomer(Long id, UpdateCustomerDTO dto) {
         log.info("Updating customer with ID: {}", id);
 
-        Customer customer = repository.findById(id)
-                .orElseThrow(() -> new CustomerNotExistsException("Customer not found"));
-
+        Customer customer = findCustomerById(id);
         mapper.updateEntityFromDTO(dto, customer);
         Customer updated = repository.save(customer);
 
@@ -83,6 +75,7 @@ public class CustomerService implements ICustomerService {
     }
 
     @Override
+    @Transactional
     public void deleteCustomer(Long id) {
         log.info("Deleting customer with ID: {}", id);
 
@@ -96,7 +89,16 @@ public class CustomerService implements ICustomerService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public boolean existsByUserId(Long userId) {
         return repository.existsByUserId(userId);
+    }
+
+    private Customer findCustomerById(Long id) {
+        return repository.findById(id)
+                .orElseThrow(() -> {
+                    log.error("Customer not found with ID: {}", id);
+                    return new CustomerNotExistsException("Customer not found");
+                });
     }
 }

@@ -1,6 +1,6 @@
 # Shopping Cart — Prueba Técnica Java
 
-Sistema de carrito de compras basado en microservicios con Spring Boot 3.5.x, Java 21 y MySQL.
+Sistema de carrito de compras basado en microservicios con Spring Boot 3.5.x, Java 21, kafka y MySQL.
 
 **Autor:** Luis Henriquez
 
@@ -62,7 +62,7 @@ Sistema de carrito de compras basado en microservicios con Spring Boot 3.5.x, Ja
 
 - **Java 21** (JDK 21+)
 - **Maven 3.9+** (incluido como `mvnw` en cada servicio)
-- **Docker Desktop** (para MySQL y ejecución de servicios)
+- **Docker Desktop** (para MySQL, Kafka y ejecución de servicios)
 - **Git**
 
 ---
@@ -86,13 +86,23 @@ O usando Docker Compose (incluye también los 6 microservicios):
 docker-compose up -d
 ```
 
-> ⚠️ `gateway-api` no está en `docker-compose.yml`. Debe ejecutarse por separado.
+Si se corren los servicios en algun IDE, ejecutar el archivo llamado solo:
+```bash
+docker compose.yml
+```
+
+Crear el topic de kafka
+```bash
+docker exec kafka kafka-topics --create --topic payments-topic --bootstrap-server localhost:9092 --partitions 1 --replication-factor 1
+```
 
 ### 2. Variables de entorno
 
-Dos variables son requeridas en el perfil por defecto:
+Cuatro variables son requeridas en el perfil por defecto:
 
 ```bash
+export DB_URL=jdbc:mysql://localhost:3306/shopping_cart
+export DB_USER=root
 export DB_PASSWORD=root
 export JWT_SECRET=Z3sOhmRhZG9yLXR1LWaVanJldGUtY29uLXNvbG9yaW8tcGFyYS1sYS1jbGF2ZS1kZWotanVnaW1lbnRvLWhzNTEyLXNlY3JldA==
 ```
@@ -100,11 +110,15 @@ export JWT_SECRET=Z3sOhmRhZG9yLXR1LWaVanJldGUtY29uLXNvbG9yaW8tcGFyYS1sYS1jbGF2ZS
 En Windows (PowerShell):
 
 ```powershell
+$env:DB_URL="jdbc:mysql://localhost:3306/shopping_cart"
+$env:DB_USER="root"
 $env:DB_PASSWORD="root"
 $env:JWT_SECRET="Z3sOhmRhZG9yLXR1LWaVanJldGUtY29uLXNvbG9yaW8tcGFyYS1sYS1jbGF2ZS1kZWotanVnaW1lbnRvLWhzNTEyLXNlY3JldA=="
 ```
 
 > El JWT_SECRET es una clave HS512 en base64. El valor mostrado aquí es el de desarrollo.
+
+> Si usas Docker Compose, MySQL expone el puerto **3300** (no 3306). Ajusta `DB_URL` a `jdbc:mysql://localhost:3300/shopping_cart`.
 
 ### 3. Construir y ejecutar (Maven)
 
@@ -193,22 +207,146 @@ http://localhost:{puerto}/swagger-ui.html
 | POST   | `/api/v1/payments`            | payment-api     |
 | GET    | `/api/v1/payments/{id}`       | payment-api     |
 
-### Flujo típico
+### Flujo completo paso a paso (Postman)
+
+Todas las requests van a `http://localhost:8080` (gateway-api).\
+Usa el perfil `dev` para desarrollo local (hardcodea credenciales y Swagger).
+
+---
+
+#### 1. Registro de usuario
+Registra un usuario en el sistema. Responde con `userId`, `email` y `token`.
 
 ```
-1. POST /api/v1/auth/register       → crea usuario
-2. POST /api/v1/auth/login          → obtiene JWT token
-3. POST /api/v1/customers           → crea cliente (requiere userId)
-4. POST /api/v1/orders              → crea orden (requiere customerId)
-5. POST /api/v1/orders-detail       → agrega productos a la orden
-6. GET  /api/v1/orders-detail/order/{id}/total  → calcula total
-7. POST /api/v1/payments            → procesa pago (requiere orderId)
+POST http://localhost:8080/api/v1/auth/register
+Content-Type: application/json
+
+{
+    "email": "test@email.com",
+    "password": "123456"
+}
 ```
 
-Incluir el header en todas las requests autenticadas:
+> **Guardar:** `userId` de la respuesta (se usará en el paso 2).
+
+---
+
+#### 2. Crear cliente (customer)
+Crea un cliente asociado al `userId` del paso anterior. Responde con `customerId`.
 
 ```
-Authorization: Bearer <jwt-token>
+POST http://localhost:8080/api/v1/customers
+Content-Type: application/json
+
+{
+    "name": "Juan Perez",
+    "email": "test@email.com",
+    "userId": 1,
+    "address": "Ciudad de Guatemala",
+    "phone": "12345678"
+}
+```
+
+> **Guardar:** `customerId` de la respuesta (se usará en el paso 4).
+
+---
+
+#### 3. Iniciar sesión (login)
+Inicia sesión con el mismo email y contraseña. Responde con un `token` JWT.
+
+```
+POST http://localhost:8080/api/v1/auth/login
+Content-Type: application/json
+
+{
+    "email": "test@email.com",
+    "password": "123456"
+}
+```
+
+> **En Postman:** en la pestaña *Tests* de esta request, agrega el script abajo para guardar el token como variable de colección y que las requests hijas lo hereden automáticamente:
+
+```javascript
+const json = pm.response.json();
+pm.collectionVariables.set("token", json.token);
+```
+
+> Luego, en cada request hija (órdenes, detail, pago), agrega el header:
+> `Authorization: Bearer {{token}}`
+
+---
+
+#### 4. Crear orden
+Crea una orden usando el `customerId` del paso 2.
+
+```
+POST http://localhost:8080/api/v1/orders
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "customerId": 1
+}
+```
+
+> **Guardar:** `id` de la respuesta (es el `orderId` para los pasos siguientes).
+
+---
+
+#### 5. Agregar productos al detalle de la orden
+Agrega productos a la orden. Usa cualquier `productId` de FakeStore API (1–20).
+
+```
+POST http://localhost:8080/api/v1/orders-detail
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "orderId": 1,
+    "productId": 1,
+    "quantity": 2
+}
+```
+
+> Opcional: repetir con distintos `productId` para agregar más productos. Puedes listar productos disponibles con `GET http://localhost:8080/api/v1/products`.
+
+---
+
+#### 6. Calcular total (opcional)
+Consulta el total acumulado del detalle de la orden.
+
+```
+GET http://localhost:8080/api/v1/orders-detail/order/1/total
+Authorization: Bearer {{token}}
+```
+
+---
+
+#### 7. Procesar pago
+Procesa el pago de la orden. El sistema simula un resultado aleatorio (`SUCCESS` o `FAILED`). Si es `SUCCESS`, publica un evento Kafka al topic `payments-topic`.
+
+```
+POST http://localhost:8080/api/v1/payments
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "orderId": 1
+}
+```
+
+> El payment-api valida que la orden exista y esté en estado `PENDING` antes de procesar.
+
+---
+
+#### Resumen de dependencias entre pasos
+
+```
+Register ──(userId)──▶ Create Customer ──(customerId)──▶ Create Order ──(orderId)──▶ Add Order Detail ──(orderId)──▶ Process Payment
+                                                                                                                        │
+Login ──(token)──▶ (se usa como Authorization header en pasos 4, 5, 6, 7)                                              │
+                                                                                                                        ▼
+                                                                                                              Kafka event (si SUCCESS)
 ```
 
 ---

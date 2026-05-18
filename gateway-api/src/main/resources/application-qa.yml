@@ -2,7 +2,9 @@ server:
   port: 8080
 
 spring:
-  profiles: dev
+  config:
+    activate:
+      on-profile: qa
   application:
     name: gateway-api
   cloud:

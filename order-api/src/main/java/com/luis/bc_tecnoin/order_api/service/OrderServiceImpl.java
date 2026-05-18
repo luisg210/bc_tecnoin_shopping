@@ -13,50 +13,48 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-/**
- * Service implementation for managing orders.
- */
+import org.springframework.transaction.annotation.Transactional;
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class OrderServiceImpl implements IOrderService {
+
+    private static final String STATUS_PENDING = "PENDING";
+    private static final String STATUS_CANCELLED = "CANCELLED";
+    private static final String STATUS_FINISH = "FINISH";
 
     private final OrderRepository repository;
     private final OrderMapper mapper;
     private final CustomerClient customerClient;
 
     @Override
+    @Transactional
     public OrderDTO createOrder(CreateOrderDTO dto, Long userId) {
-        log.info("Creating order: {}", dto);
+        log.info("Creating order for customerId={}, userId={}", dto.getCustomerId(), userId);
 
-        // Validate customer existence
         if (!customerClient.existsByUserId(userId)) {
             throw new CustomerNotFoundException(userId);
         }
 
         Order order = new Order();
         order.setCustomerId(dto.getCustomerId());
-        order.setStatus("PENDING");
+        order.setStatus(STATUS_PENDING);
         Order saved = repository.save(order);
 
-        log.info("Order created: {}", saved);
+        log.info("Order created with id={}", saved.getId());
         return mapper.toResponseDto(saved);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public OrderDTO getOrderById(Long id) {
-        log.info("Fetching order with ID: {}", id);
-        Order order = repository.findById(id)
-                .orElseThrow(() ->
-                {
-                    log.error("Order not found with ID: {}", id);
-                    return new OrderNotFoundException(id);
-                });
-        return mapper.toResponseDto(order);
+        log.debug("Fetching order with id={}", id);
+        return mapper.toResponseDto(findOrderById(id));
     }
 
-
     @Override
+    @Transactional(readOnly = true)
     public Page<OrderDTO> getAllOrders(Long customerId, Pageable pageable) {
         log.debug("Fetching orders for customerId={} with pagination", customerId);
 
@@ -70,42 +68,42 @@ public class OrderServiceImpl implements IOrderService {
     }
 
     @Override
+    @Transactional
     public void cancelOrder(Long id) {
-        Order order = repository.findById(id)
-                .orElseThrow(() ->
-                {
-                    log.error("Order not found with ID: {}", id);
-                    return new OrderNotFoundException(id);
-                });
-        order.setStatus("CANCELLED");
+        Order order = findOrderById(id);
+        order.setStatus(STATUS_CANCELLED);
         repository.save(order);
-        log.info("Order with id: {} cancelled", id);
+        log.info("Order with id={} cancelled", id);
     }
 
     @Override
+    @Transactional
     public void finishOrder(Long id) {
-        Order order = repository.findById(id)
-                .orElseThrow(() ->
-                {
-                    log.error("Order not found with ID: {}", id);
-                    return new OrderNotFoundException(id);
-                });
-        order.setStatus("FINISH");
+        Order order = findOrderById(id);
+        order.setStatus(STATUS_FINISH);
         repository.save(order);
-        log.info("Order with id: {} finish", id);
+        log.info("Order with id={} finished", id);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public boolean existsById(Long id) {
         log.debug("Checking existence of order with id={}", id);
         return repository.existsById(id);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public String getOrderStatus(Long id) {
         log.debug("Fetching status for order id={}", id);
-        Order order = repository.findById(id)
-                .orElseThrow(() -> new OrderNotFoundException(id));
-        return order.getStatus();
+        return findOrderById(id).getStatus();
+    }
+
+    private Order findOrderById(Long id) {
+        return repository.findById(id)
+                .orElseThrow(() -> {
+                    log.error("Order not found with id={}", id);
+                    return new OrderNotFoundException(id);
+                });
     }
 }

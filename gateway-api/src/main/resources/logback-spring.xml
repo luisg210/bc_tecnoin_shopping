@@ -2,7 +2,7 @@
 <configuration>
 
     <property name="LOG_PATH" value="logs"/>
-    <property name="LOG_FILE" value="${LOG_PATH}/department_service.log"/>
+    <property name="LOG_FILE" value="${LOG_PATH}/gateway_service.log"/>
 
     <!-- Appender para consola -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
@@ -15,8 +15,8 @@
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${LOG_FILE}</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${LOG_PATH}/app.%d{yyyy-MM-dd}.log</fileNamePattern>
-            <maxHistory>30</maxHistory>njjj
+            <fileNamePattern>${LOG_PATH}/gateway_service.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
         </rollingPolicy>
         <encoder>
             <pattern>%d{yyyy-MM-dd HH:mm:ss} %-5level [%thread] %logger{36} - %msg%n</pattern>

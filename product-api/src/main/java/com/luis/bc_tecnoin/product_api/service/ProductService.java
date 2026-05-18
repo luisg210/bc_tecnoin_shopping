@@ -8,27 +8,16 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-
-/**
- * Service layer responsible for communicating with FakeStore API.
- * Uses WebClient for non-blocking HTTP calls.
- */
 @Service
 @Slf4j
 public class ProductService implements IProductService {
 
     private final WebClient webClient;
 
-    @Value("${external.api}")
-    private String productApi;
-
-    public ProductService(WebClient.Builder builder) {
-        this.webClient = builder.baseUrl("https://fakestoreapi.com").build();
+    public ProductService(WebClient.Builder builder, @Value("${external.api}") String baseUrl) {
+        this.webClient = builder.baseUrl(baseUrl).build();
     }
 
-    /**
-     * Retrieve all products from FakeStore API.
-     */
     @Override
     public Flux<ProductDto> getAllProducts() {
         return webClient.get()
@@ -37,9 +26,6 @@ public class ProductService implements IProductService {
                 .bodyToFlux(ProductDto.class);
     }
 
-    /**
-     * Retrieve a single product by ID.
-     */
     @Override
     public Mono<ProductDto> getProductById(Long id) {
         return webClient.get()

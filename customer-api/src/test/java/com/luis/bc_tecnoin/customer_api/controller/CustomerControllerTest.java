@@ -39,7 +39,7 @@ class CustomerControllerTest {
     private CustomerService service;
 
     @Test
-    void createCustomer_shouldReturn200_whenValid() throws Exception {
+    void createCustomer_shouldReturn201_whenValid() throws Exception {
         CreateCustomerDTO dto = new CreateCustomerDTO();
         dto.setName("Test");
         dto.setEmail("test@example.com");
@@ -52,7 +52,7 @@ class CustomerControllerTest {
                         .header("X-User-Id", "1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.name").value("Test"))
                 .andExpect(jsonPath("$.email").value("test@example.com"));
     }

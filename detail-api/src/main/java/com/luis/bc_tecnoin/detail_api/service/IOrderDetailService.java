@@ -2,6 +2,7 @@ package com.luis.bc_tecnoin.detail_api.service;
 
 import com.luis.bc_tecnoin.detail_api.dto.CreateOrderDetailDTO;
 import com.luis.bc_tecnoin.detail_api.dto.OrderDetailDTO;
+import com.luis.bc_tecnoin.detail_api.dto.OrderWithDetailsDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -12,4 +13,5 @@ public interface IOrderDetailService {
     void deleteOrderDetail(Long id);
     boolean existsById(Long id);
     Double calculateTotal(Long orderId);
+    OrderWithDetailsDTO getOrderWithDetails(Long orderId);
 }
