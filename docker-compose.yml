@@ -1,0 +1,78 @@
+version: '3.8'
+services:
+  db:
+    image: mysql:8.0
+    container_name: mysql-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: shopping_cart
+      MYSQL_USER: root
+      MYSQL_PASSWORD: root
+    ports:
+      - "3306:3306"
+    networks:
+      - backend
+
+  auth-service:
+    build: ./auth-api
+    environment:
+      - DB_USER=root
+      - DB_PASSWORD=root
+    ports:
+      - "8081:8081"
+    networks:
+      - backend
+
+  product-service:
+    build: ./product-api
+    environment:
+      - DB_USER=root
+      - DB_PASSWORD=root
+    ports:
+      - "8082:8082"
+    networks:
+      - backend
+
+  customer-service:
+    build: ./customer-api
+    environment:
+      - DB_USER=root
+      - DB_PASSWORD=root
+    ports:
+      - "8083:8083"
+    networks:
+      - backend
+
+  order-service:
+    build: ./order-api
+    environment:
+      - DB_USER=root
+      - DB_PASSWORD=root
+    ports:
+      - "8084:8084"
+    networks:
+      - backend
+
+  detail-service:
+    build: ./detail-api
+    environment:
+      - DB_USER=root
+      - DB_PASSWORD=root
+    ports:
+      - "8085:8085"
+    networks:
+      - backend
+
+  payment-service:
+    build: ./payment-api
+    environment:
+      - DB_USER=root
+      - DB_PASSWORD=root
+    ports:
+      - "8086:8086"
+    networks:
+      - backend
+
+networks:
+  backend:
+    driver: bridge

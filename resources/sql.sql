@@ -44,7 +44,6 @@ CREATE TABLE order_detail (
 CREATE TABLE order_payment (
     payment_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     order_id INT UNSIGNED NOT NULL,
-    payment_method VARCHAR(50),
     amount DECIMAL(10,2),
     payment_date DATETIME DEFAULT CURRENT_TIMESTAMP,
     status VARCHAR(50) DEFAULT 'PENDING'

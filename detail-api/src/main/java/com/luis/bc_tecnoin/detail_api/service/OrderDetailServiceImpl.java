@@ -100,4 +100,25 @@ public class OrderDetailServiceImpl implements IOrderDetailService {
         repository.delete(detail);
         log.info("Order detail with id={} deleted successfully", id);
     }
+
+    @Override
+    public boolean existsById(Long id) {
+        log.info("Exists by id, with id={}", id);
+        return repository.existsById(id);
+    }
+
+    @Override
+    public Double calculateTotal(Long orderId) {
+        log.debug("Calculating total for orderId={}", orderId);
+
+        if (!this.existsById(orderId)) {
+            log.error("Order with id={} not found", orderId);
+            throw new InvalidOrderException(orderId);
+        }
+
+        return repository.findAllByOrderId(orderId, Pageable.unpaged())
+                .stream()
+                .mapToDouble(OrderDetail::getSubtotal)
+                .sum();
+    }
 }

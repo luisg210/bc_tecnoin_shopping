@@ -44,4 +44,16 @@ public class OrderDetailController {
         service.deleteOrderDetail(id);
         return ResponseEntity.noContent().build();
     }
+
+    @DeleteMapping("/{id}/exists")
+    public ResponseEntity<Void> existsOrderDetail(@PathVariable Long id) {
+        service.existsById(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/order/{orderId}/total")
+    public ResponseEntity<Double> calculateTotal(@PathVariable Long orderId) {
+        Double total = service.calculateTotal(orderId);
+        return ResponseEntity.ok(total);
+    }
 }

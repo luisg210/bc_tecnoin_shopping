@@ -10,4 +10,6 @@ public interface IOrderDetailService {
     OrderDetailDTO getOrderDetailById(Long id);
     Page<OrderDetailDTO> getOrderDetailsByOrderId(Long orderId, Pageable pageable);
     void deleteOrderDetail(Long id);
+    boolean existsById(Long id);
+    Double calculateTotal(Long orderId);
 }

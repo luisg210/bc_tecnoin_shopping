@@ -2,7 +2,7 @@
 <configuration>
 
     <property name="LOG_PATH" value="logs"/>
-    <property name="LOG_FILE" value="${LOG_PATH}/order_details_service.log"/>
+    <property name="LOG_FILE" value="${LOG_PATH}/payment_service.log"/>
 
     <!-- Appender para consola -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
