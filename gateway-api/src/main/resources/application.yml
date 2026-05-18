@@ -25,6 +25,10 @@ spring:
               uri: http://localhost:8084
               predicates:
                 - Path=/api/v1/orders/**
+            - id: order-detail-service
+              uri: http://localhost:8085
+              predicates:
+                - Path=/api/v1/orders-detail/**
           default-filters:
             - RemoveRequestHeader=Cookie
 

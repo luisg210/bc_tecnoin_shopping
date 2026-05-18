@@ -29,7 +29,7 @@ public class GlobalExeptionController {
     }
 
     @ExceptionHandler(OrderNotFoundException.class)
-    public ResponseEntity<Map<String, String>> handleCOrderNotExists(OrderNotFoundException ex) {
+    public ResponseEntity<Map<String, String>> handleOrderNotExists(OrderNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(Map.of("error", ex.getMessage()));
     }

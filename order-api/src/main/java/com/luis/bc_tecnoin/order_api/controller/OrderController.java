@@ -4,7 +4,6 @@ import com.luis.bc_tecnoin.order_api.dto.CreateOrderDTO;
 import com.luis.bc_tecnoin.order_api.dto.OrderDTO;
 import com.luis.bc_tecnoin.order_api.service.IOrderService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
@@ -15,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
  */
 @RestController
 @RequestMapping("/api/v1/orders")
-@Slf4j
 @RequiredArgsConstructor
 public class OrderController {
 

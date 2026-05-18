@@ -20,15 +20,6 @@ CREATE TABLE customer (
     phone VARCHAR(20)
 );
 
--- Table: products
-CREATE TABLE product (
-    product_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    description VARCHAR(255),
-    price DECIMAL(10,2) NOT NULL,
-    stock INT DEFAULT 0
-);
-
 -- Table: orders
 CREATE TABLE orders (
     order_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -46,7 +37,7 @@ CREATE TABLE order_detail (
     product_id INT UNSIGNED NOT NULL,
     quantity INT NOT NULL,
     unit_price DECIMAL(10,2) NOT NULL,
-    subtotal DECIMAL(10,2) GENERATED ALWAYS AS (quantity * unit_price) STORED
+    subtotal DECIMAL(10,2) NOT NULL
 );
 
 -- Table: order_payments
@@ -61,3 +52,4 @@ CREATE TABLE order_payment (
 
 
 SELECT * FROM customer;
+SELECT * FROM order_detail;
