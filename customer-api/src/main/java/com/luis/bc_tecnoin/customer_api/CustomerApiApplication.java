@@ -2,12 +2,9 @@ package com.luis.bc_tecnoin.customer_api;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.cloud.openfeign.EnableFeignClients;
-import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
+
 
 @SpringBootApplication
-@EnableFeignClients(basePackages = "com.luis.bc_tecnoin.customer_api.clients")
-@EnableJpaAuditing
 public class CustomerApiApplication {
 
 	public static void main(String[] args) {

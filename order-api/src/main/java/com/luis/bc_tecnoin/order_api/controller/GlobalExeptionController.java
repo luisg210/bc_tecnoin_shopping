@@ -2,6 +2,7 @@ package com.luis.bc_tecnoin.order_api.controller;
 
 import com.luis.bc_tecnoin.order_api.dto.error.FieldErrorDTO;
 import com.luis.bc_tecnoin.order_api.dto.error.ValidationErrorDTO;
+import com.luis.bc_tecnoin.order_api.exception.CustomerNotFoundException;
 import com.luis.bc_tecnoin.order_api.exception.OrderNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,6 +31,12 @@ public class GlobalExeptionController {
 
     @ExceptionHandler(OrderNotFoundException.class)
     public ResponseEntity<Map<String, String>> handleOrderNotExists(OrderNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Map.of("error", ex.getMessage()));
+    }
+
+    @ExceptionHandler(CustomerNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleCustomerNotExists(CustomerNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(Map.of("error", ex.getMessage()));
     }
